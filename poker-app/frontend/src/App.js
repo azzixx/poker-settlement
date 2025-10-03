@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 
 function App() {
@@ -6,7 +6,15 @@ function App() {
   const [name, setName] = useState("");
   const [results, setResults] = useState(null);
   const [buyinsHistory, setBuyinsHistory] = useState([]);
-  const [expanded, setExpanded] = useState(null); // Track expanded card
+  const [expanded, setExpanded] = useState(null);
+
+  useEffect(() => {
+    // Add viewport meta to avoid zoom on input focus (iOS fix)
+    const meta = document.createElement("meta");
+    meta.name = "viewport";
+    meta.content = "width=device-width, initial-scale=1, maximum-scale=1";
+    document.getElementsByTagName("head")[0].appendChild(meta);
+  }, []);
 
   const addPlayer = () => {
     if (!name.trim() || players.find((p) => p.name === name)) return;
@@ -46,9 +54,7 @@ function App() {
   const removeBuyin = (id) => {
     const buyinToRemove = buyinsHistory.find((b) => b.id === id);
     if (!buyinToRemove) return;
-
     setBuyinsHistory(buyinsHistory.filter((b) => b.id !== id));
-
     setPlayers(
       players.map((p) =>
         p.name === buyinToRemove.name
@@ -93,6 +99,28 @@ function App() {
     }
   };
 
+  const copyToClipboard = () => {
+    if (!results) return;
+    const text = `Poker Settlement\n\nSummary:\n${results.summary
+      .map((s) => `${s.name}: ${s.net >= 0 ? "+" : ""}${s.net}₪`)
+      .join("\n")}\n\nSettlements:\n${results.transfers
+      .map((t) => `${t.from} → ${t.to}: ${t.amount}₪`)
+      .join("\n")}`;
+    navigator.clipboard.writeText(text);
+    alert("📋 Results copied to clipboard!");
+  };
+
+  const shareWhatsApp = () => {
+    if (!results) return;
+    const text = `Poker Settlement\n\nSummary:\n${results.summary
+      .map((s) => `${s.name}: ${s.net >= 0 ? "+" : ""}${s.net}₪`)
+      .join("\n")}\n\nSettlements:\n${results.transfers
+      .map((t) => `${t.from} → ${t.to}: ${t.amount}₪`)
+      .join("\n")}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    window.open(url, "_blank");
+  };
+
   return (
     <div className="App">
       <h1>♠️ Poker Settlement</h1>
@@ -117,12 +145,8 @@ function App() {
             <p>{p.buyinTotal}₪ invested | {p.buyinCount} buys</p>
             <p>Final: {p.final || 0}₪</p>
 
-            {/* Expanded functionality */}
             {expanded === p.name && (
-              <div
-                className="player-expanded"
-                onClick={(e) => e.stopPropagation()} // ✅ Prevent collapse on input click
-              >
+              <div className="player-expanded" onClick={(e) => e.stopPropagation()}>
                 <div className="buyin-controls">
                   <input
                     type="number"
@@ -141,9 +165,7 @@ function App() {
                     placeholder="Final cash"
                   />
                 </div>
-                <button
-                  onClick={() => setPlayers(players.filter((pl) => pl.name !== p.name))}
-                >
+                <button onClick={() => setPlayers(players.filter((pl) => pl.name !== p.name))}>
                   ❌ Remove Player
                 </button>
               </div>
@@ -152,31 +174,10 @@ function App() {
         ))}
       </div>
 
-      <button onClick={calculate} style={{ marginTop: 20, marginBottom: 20 }}>
+      <button className="calculate-btn" onClick={calculate}>
         💰 Calculate
       </button>
 
-      {/* Buy-ins History */}
-      {buyinsHistory.length > 0 && (
-        <div className="results-box">
-          <h2>🪙 Buy-ins History</h2>
-          <div className="card-container">
-            {buyinsHistory.map((b) => (
-              <div key={b.id} className="buyin-card">
-                <p>
-                  <b>{b.name}</b> bought in {b.amount}₪
-                </p>
-                <small>{new Date(b.timestamp).toLocaleTimeString()}</small>
-                <button className="remove-buyin" onClick={() => removeBuyin(b.id)}>
-                  ❌
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Summary & Settlements */}
       {results && (
         <div className="results-container">
           <div className="results-box">
@@ -192,10 +193,7 @@ function App() {
                   <h3>{s.name}</h3>
                   <p>Invested: {s.invested}₪</p>
                   <p>Final: {s.final}₪</p>
-                  <p>
-                    Net: {s.net >= 0 ? "+" : ""}
-                    {s.net}₪
-                  </p>
+                  <p>Net: {s.net >= 0 ? "+" : ""}{s.net}₪</p>
                 </div>
               ))}
             </div>
@@ -216,6 +214,12 @@ function App() {
               ) : (
                 <p>No transfers needed</p>
               )}
+            </div>
+
+            {/* Share Buttons */}
+            <div className="share-buttons">
+              <button className="copy-btn" onClick={copyToClipboard}>📋 Copy</button>
+              <button className="whatsapp-btn" onClick={shareWhatsApp}>💬 WhatsApp</button>
             </div>
           </div>
         </div>
