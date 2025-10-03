@@ -286,3 +286,57 @@ button[style]:hover {
   transform: scale(1.06);
   box-shadow: 0 0 16px rgba(37, 211, 102, 0.9);
 }
+
+
+/* Make tables scrollable on small screens */
+@media (max-width: 768px) {
+  table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  th, td {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+
+  .buyin-controls input {
+    width: 70px;
+  }
+
+  .final-cash-cell input {
+    width: 90px;
+  }
+
+  /* Stack results vertically */
+  .results-container {
+    flex-direction: column;
+    gap: 15px;
+  }
+}
+
+/* For very small phones (iPhone SE, etc.) */
+@media (max-width: 480px) {
+  h1 {
+    font-size: 1.6rem;
+  }
+
+  button,
+  .buyin-controls button {
+    padding: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  .results-box {
+    padding: 15px;
+  }
+
+  .player-card,
+  .settlement-card,
+  .buyin-card {
+    font-size: 0.9rem;
+    padding: 10px;
+  }
+}
