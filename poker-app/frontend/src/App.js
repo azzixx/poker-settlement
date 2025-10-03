@@ -9,7 +9,6 @@ function App() {
   const [expanded, setExpanded] = useState(null);
 
   useEffect(() => {
-    // Add viewport meta to avoid zoom on input focus (iOS fix)
     const meta = document.createElement("meta");
     meta.name = "viewport";
     meta.content = "width=device-width, initial-scale=1, maximum-scale=1";
@@ -141,6 +140,16 @@ function App() {
             className={`player-card ${expanded === p.name ? "expanded" : ""}`}
             onClick={() => setExpanded(expanded === p.name ? null : p.name)}
           >
+            <button
+              className="remove-player-btn"
+              onClick={(e) => {
+                e.stopPropagation();
+                setPlayers(players.filter((pl) => pl.name !== p.name));
+              }}
+            >
+              ❌
+            </button>
+
             <h3>{p.name}</h3>
             <p>{p.buyinTotal}₪ invested | {p.buyinCount} buys</p>
             <p>Final: {p.final || 0}₪</p>
@@ -154,9 +163,8 @@ function App() {
                     onChange={(e) => updateBuyinInput(p.name, e.target.value)}
                     placeholder="Amount"
                   />
-                  <button onClick={() => addBuyin(p.name, p.buyinInput)}>➕</button>
+                  <button onClick={() => addBuyin(p.name, p.buyinInput)}>➕ Buy-in</button>
                 </div>
-                <p>{p.buyinCount} buys / {p.buyinTotal}₪</p>
                 <div className="final-cash-cell">
                   <input
                     type="number"
@@ -165,9 +173,6 @@ function App() {
                     placeholder="Final cash"
                   />
                 </div>
-                <button onClick={() => setPlayers(players.filter((pl) => pl.name !== p.name))}>
-                  ❌ Remove Player
-                </button>
               </div>
             )}
           </div>
@@ -216,7 +221,6 @@ function App() {
               )}
             </div>
 
-            {/* Share Buttons */}
             <div className="share-buttons">
               <button className="copy-btn" onClick={copyToClipboard}>📋 Copy</button>
               <button className="whatsapp-btn" onClick={shareWhatsApp}>💬 WhatsApp</button>
