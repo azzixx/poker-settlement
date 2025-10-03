@@ -79,7 +79,7 @@ function App() {
 
     try {
       // ✅ relative path works both locally (with proxy) and on Render
-      const res = await fetch("/calculate", {
+      const res = await fetch("/https://poker-backend.onrender.com/calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ players: cleanPlayers }),
