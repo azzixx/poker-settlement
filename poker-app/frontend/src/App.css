@@ -340,3 +340,32 @@ button[style]:hover {
     padding: 10px;
   }
 }
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+  border-radius: 14px;
+  overflow-x: auto;
+  display: block;       /* Makes table scrollable */
+}
+
+th, td {
+  font-size: 0.9rem;
+  padding: 10px;
+}
+
+/* On very small screens, stack the results */
+@media (max-width: 768px) {
+  .results-container {
+    flex-direction: column;
+  }
+
+  .results-box {
+    min-width: 100% !important;
+  }
+
+  input[type="number"], input[type="text"] {
+    width: 100%;
+  }
+}
