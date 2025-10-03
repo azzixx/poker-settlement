@@ -1,4 +1,3 @@
-// frontend/src/App.js
 import React, { useState } from "react";
 import "./App.css";
 
@@ -7,7 +6,7 @@ function App() {
   const [name, setName] = useState("");
   const [results, setResults] = useState(null);
   const [buyinsHistory, setBuyinsHistory] = useState([]);
-  const [activePlayer, setActivePlayer] = useState(null);
+  const [expanded, setExpanded] = useState(null); // Track expanded card
 
   const addPlayer = () => {
     if (!name.trim() || players.find((p) => p.name === name)) return;
@@ -107,19 +106,23 @@ function App() {
       </div>
 
       {/* Player Cards */}
-      <div className="player-cards-container">
+      <div className="player-cards">
         {players.map((p) => (
           <div
             key={p.name}
-            className="mini-card"
-            onClick={() => setActivePlayer(activePlayer === p.name ? null : p.name)}
+            className={`player-card ${expanded === p.name ? "expanded" : ""}`}
+            onClick={() => setExpanded(expanded === p.name ? null : p.name)}
           >
             <h3>{p.name}</h3>
-            <p>{p.buyinCount} buys / {p.buyinTotal}₪</p>
+            <p>{p.buyinTotal}₪ invested | {p.buyinCount} buys</p>
+            <p>Final: {p.final || 0}₪</p>
 
-            {/* Expanded details */}
-            {activePlayer === p.name && (
-              <div className="expanded-card">
+            {/* Expanded functionality */}
+            {expanded === p.name && (
+              <div
+                className="player-expanded"
+                onClick={(e) => e.stopPropagation()} // ✅ Prevent collapse on input click
+              >
                 <div className="buyin-controls">
                   <input
                     type="number"
@@ -129,21 +132,16 @@ function App() {
                   />
                   <button onClick={() => addBuyin(p.name, p.buyinInput)}>➕</button>
                 </div>
-
-                <p>Status: {p.buyinCount} buys / {p.buyinTotal}₪</p>
-
-                <div className="final-cash">
-                  <label>Final Cash:</label>
+                <p>{p.buyinCount} buys / {p.buyinTotal}₪</p>
+                <div className="final-cash-cell">
                   <input
                     type="number"
                     value={p.final}
                     onChange={(e) => updateFinal(p.name, e.target.value)}
-                    placeholder="0"
+                    placeholder="Final cash"
                   />
                 </div>
-
                 <button
-                  className="remove-player"
                   onClick={() => setPlayers(players.filter((pl) => pl.name !== p.name))}
                 >
                   ❌ Remove Player
@@ -154,7 +152,7 @@ function App() {
         ))}
       </div>
 
-      <button onClick={calculate} className="calculate-btn">
+      <button onClick={calculate} style={{ marginTop: 20, marginBottom: 20 }}>
         💰 Calculate
       </button>
 
@@ -194,7 +192,8 @@ function App() {
                   <h3>{s.name}</h3>
                   <p>Invested: {s.invested}₪</p>
                   <p>Final: {s.final}₪</p>
-                  <p>Net: {s.net >= 0 ? "+" : ""}
+                  <p>
+                    Net: {s.net >= 0 ? "+" : ""}
                     {s.net}₪
                   </p>
                 </div>
