@@ -78,8 +78,7 @@ function App() {
     }));
 
     try {
-      // ✅ relative path works both locally (with proxy) and on Render
-      const res = await fetch("/https://poker-backend.onrender.com/calculate", {
+      const res = await fetch("/calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ players: cleanPlayers }),
@@ -119,8 +118,6 @@ function App() {
             {players.map((p) => (
               <tr key={p.name}>
                 <td>{p.name}</td>
-
-                {/* Buy-in */}
                 <td>
                   <div className="buyin-cell">
                     <div className="buyin-controls">
@@ -134,15 +131,11 @@ function App() {
                     </div>
                   </div>
                 </td>
-
-                {/* Buy-in Status */}
                 <td>
                   <span>
                     {p.buyinCount} buys / {p.buyinTotal}₪
                   </span>
                 </td>
-
-                {/* Final Cash */}
                 <td className="final-cash-cell">
                   <input
                     type="number"
@@ -151,8 +144,6 @@ function App() {
                     placeholder="0"
                   />
                 </td>
-
-                {/* Remove */}
                 <td>
                   <button onClick={() => setPlayers(players.filter((pl) => pl.name !== p.name))}>
                     ❌
