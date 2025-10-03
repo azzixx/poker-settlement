@@ -78,7 +78,7 @@ function App() {
     }));
 
     try {
-      const res = await fetch("https://poker-backend.onrender.com/calculate", {
+      const res = await fetch("/calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ players: cleanPlayers }),
