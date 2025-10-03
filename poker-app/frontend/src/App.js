@@ -7,6 +7,7 @@ function App() {
   const [name, setName] = useState("");
   const [results, setResults] = useState(null);
   const [buyinsHistory, setBuyinsHistory] = useState([]);
+  const [activePlayer, setActivePlayer] = useState(null);
 
   const addPlayer = () => {
     if (!name.trim() || players.find((p) => p.name === name)) return;
@@ -78,7 +79,7 @@ function App() {
     }));
 
     try {
-      const res = await fetch("/calculate", {
+      const res = await fetch("https://poker-backend.onrender.com/calculate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ players: cleanPlayers }),
@@ -96,66 +97,64 @@ function App() {
   return (
     <div className="App">
       <h1>♠️ Poker Settlement</h1>
-      <input
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Enter player name"
-      />
-      <button onClick={addPlayer}>➕ Add Player</button>
+      <div className="add-player">
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Enter player name"
+        />
+        <button onClick={addPlayer}>➕ Add Player</button>
+      </div>
 
-      <div className="table-wrapper">
-        <table>
-          <thead>
-            <tr>
-              <th>Player</th>
-              <th>Buy-in</th>
-              <th>Buy-in Status</th>
-              <th>Final Cash</th>
-              <th>Remove</th>
-            </tr>
-          </thead>
-          <tbody>
-            {players.map((p) => (
-              <tr key={p.name}>
-                <td>{p.name}</td>
-                <td>
-                  <div className="buyin-cell">
-                    <div className="buyin-controls">
-                      <input
-                        type="number"
-                        value={p.buyinInput}
-                        onChange={(e) => updateBuyinInput(p.name, e.target.value)}
-                        placeholder="Amount"
-                      />
-                      <button onClick={() => addBuyin(p.name, p.buyinInput)}>➕</button>
-                    </div>
-                  </div>
-                </td>
-                <td>
-                  <span>
-                    {p.buyinCount} buys / {p.buyinTotal}₪
-                  </span>
-                </td>
-                <td className="final-cash-cell">
+      {/* Player Cards */}
+      <div className="player-cards-container">
+        {players.map((p) => (
+          <div
+            key={p.name}
+            className="mini-card"
+            onClick={() => setActivePlayer(activePlayer === p.name ? null : p.name)}
+          >
+            <h3>{p.name}</h3>
+            <p>{p.buyinCount} buys / {p.buyinTotal}₪</p>
+
+            {/* Expanded details */}
+            {activePlayer === p.name && (
+              <div className="expanded-card">
+                <div className="buyin-controls">
+                  <input
+                    type="number"
+                    value={p.buyinInput}
+                    onChange={(e) => updateBuyinInput(p.name, e.target.value)}
+                    placeholder="Amount"
+                  />
+                  <button onClick={() => addBuyin(p.name, p.buyinInput)}>➕</button>
+                </div>
+
+                <p>Status: {p.buyinCount} buys / {p.buyinTotal}₪</p>
+
+                <div className="final-cash">
+                  <label>Final Cash:</label>
                   <input
                     type="number"
                     value={p.final}
                     onChange={(e) => updateFinal(p.name, e.target.value)}
                     placeholder="0"
                   />
-                </td>
-                <td>
-                  <button onClick={() => setPlayers(players.filter((pl) => pl.name !== p.name))}>
-                    ❌
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                </div>
+
+                <button
+                  className="remove-player"
+                  onClick={() => setPlayers(players.filter((pl) => pl.name !== p.name))}
+                >
+                  ❌ Remove Player
+                </button>
+              </div>
+            )}
+          </div>
+        ))}
       </div>
 
-      <button onClick={calculate} style={{ marginTop: 20, marginBottom: 20 }}>
+      <button onClick={calculate} className="calculate-btn">
         💰 Calculate
       </button>
 
