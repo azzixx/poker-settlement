@@ -45,6 +45,7 @@ function App() {
     if (!buyinToRemove) return;
 
     setBuyinsHistory(buyinsHistory.filter(b => b.id !== id));
+
     setPlayers(players.map(p =>
       p.name === buyinToRemove.name
         ? {
@@ -69,24 +70,46 @@ function App() {
   };
 
   const calculate = async () => {
-    const investedMap = {};
-    buyinsHistory.forEach(b => {
-      investedMap[b.name] = (investedMap[b.name] || 0) + b.amount;
-    });
-
     const cleanPlayers = players.map(p => ({
       ...p,
-      invested: investedMap[p.name] || 0,
+      invested: p.buyinTotal,
       final: parseInt(p.final) || 0
     }));
 
-    const res = await fetch("/calculate", {
+    const res = await fetch("http://localhost:4000/calculate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ players: cleanPlayers })
     });
     const data = await res.json();
     setResults(data);
+  };
+
+  const buildShareMessage = () => {
+    if (!results) return "";
+
+    let text = "♠️ Poker Settlement Results\n\n";
+
+    // Summary
+    text += "📊 Summary:\n";
+    results.summary.forEach(s => {
+      text += `${s.name}: Invested ${s.invested}₪ | Final ${s.final}₪ | Net ${s.net >= 0 ? "+" : ""}${s.net}₪\n`;
+    });
+
+    text += `\n🏆 Total Pot: ${results.summary.reduce((a, b) => a + b.final, 0)}₪\n`;
+    text += `Balance Check: ${results.totalNet}₪\n\n`;
+
+    // Settlements
+    text += "💸 Settlements:\n";
+    if (results.transfers.length > 0) {
+      results.transfers.forEach(t => {
+        text += `${t.from} → ${t.to}: ${t.amount}₪\n`;
+      });
+    } else {
+      text += "No transfers needed\n";
+    }
+
+    return text;
   };
 
   return (
@@ -104,6 +127,7 @@ function App() {
           <tr>
             <th>Player</th>
             <th>Buy-in</th>
+            <th>Buy-in Status</th>
             <th>Final Cash</th>
             <th>Remove</th>
           </tr>
@@ -112,21 +136,31 @@ function App() {
           {players.map(p => (
             <tr key={p.name}>
               <td>{p.name}</td>
+
+              {/* Buy-in */}
               <td>
                 <div className="buyin-cell">
-                  <input
-                    type="number"
-                    value={p.buyinInput}
-                    onChange={e => updateBuyinInput(p.name, e.target.value)}
-                    placeholder="Amount"
-                  />
-                  <button onClick={() => addBuyin(p.name, p.buyinInput)}>➕</button>
-                  <div className="buyin-status">
-                    {p.buyinCount} buys / {p.buyinTotal}₪
+                  <div className="buyin-controls">
+                    <input
+                      type="number"
+                      value={p.buyinInput}
+                      onChange={e => updateBuyinInput(p.name, e.target.value)}
+                      placeholder="Amount"
+                    />
+                    <button onClick={() => addBuyin(p.name, p.buyinInput)}>➕</button>
                   </div>
                 </div>
               </td>
+
+              {/* Buy-in Status */}
               <td>
+                <span>
+                  {p.buyinCount} buys / {p.buyinTotal}₪
+                </span>
+              </td>
+
+              {/* Final Cash */}
+              <td className="final-cash-cell">
                 <input
                   type="number"
                   value={p.final}
@@ -134,8 +168,12 @@ function App() {
                   placeholder="0"
                 />
               </td>
+
+              {/* Remove */}
               <td>
-                <button onClick={() => setPlayers(players.filter(pl => pl.name !== p.name))}>
+                <button
+                  onClick={() => setPlayers(players.filter(pl => pl.name !== p.name))}
+                >
                   ❌
                 </button>
               </td>
@@ -144,8 +182,11 @@ function App() {
         </tbody>
       </table>
 
-      <button onClick={calculate} style={{ marginTop: 20 }}>💰 Calculate</button>
+      <button onClick={calculate} style={{ marginTop: 20, marginBottom: 20 }}>
+        💰 Calculate
+      </button>
 
+      {/* Buy-ins History */}
       {buyinsHistory.length > 0 && (
         <div className="results-box">
           <h2>🪙 Buy-ins History</h2>
@@ -154,20 +195,29 @@ function App() {
               <div key={b.id} className="buyin-card">
                 <p><b>{b.name}</b> bought in {b.amount}₪</p>
                 <small>{new Date(b.timestamp).toLocaleTimeString()}</small>
-                <button onClick={() => removeBuyin(b.id)}>❌</button>
+                <button
+                  className="remove-buyin"
+                  onClick={() => removeBuyin(b.id)}
+                >
+                  ❌
+                </button>
               </div>
             ))}
           </div>
         </div>
       )}
 
+      {/* Summary & Settlements */}
       {results && (
         <div className="results-container">
           <div className="results-box">
             <h2>📊 Summary</h2>
             <div className="card-container">
               {results.summary.map(s => (
-                <div key={s.name} className="player-card">
+                <div
+                  key={s.name}
+                  className={`player-card ${s.net > 0 ? "winner" : s.net < 0 ? "loser" : "neutral"}`}
+                >
                   <h3>{s.name}</h3>
                   <p>Invested: {s.invested}₪</p>
                   <p>Final: {s.final}₪</p>
@@ -192,6 +242,31 @@ function App() {
               ) : (
                 <p>No transfers needed</p>
               )}
+            </div>
+
+            {/* 📤 Share buttons */}
+            <div className="share-buttons">
+              <button
+                className="copy-btn"
+                onClick={() => {
+                  const text = buildShareMessage();
+                  navigator.clipboard.writeText(text);
+                  alert("✅ Results copied to clipboard!");
+                }}
+              >
+                📋 Copy
+              </button>
+
+              <button
+                className="whatsapp-btn"
+                onClick={() => {
+                  const text = buildShareMessage();
+                  const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+                  window.open(url, "_blank");
+                }}
+              >
+                💬 WhatsApp
+              </button>
             </div>
           </div>
         </div>
