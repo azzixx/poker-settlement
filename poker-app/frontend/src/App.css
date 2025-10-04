@@ -19,21 +19,23 @@ h1 {
   -webkit-text-fill-color: transparent;
 }
 
-/* Add Player Input */
+/* --- Add Player Input --- */
 .add-player {
   display: flex;
   justify-content: center;
   gap: 10px;
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .add-player input {
   padding: 10px;
   border-radius: 8px;
-  background: rgba(50,50,52,0.9);
+  background: rgba(50, 50, 52, 0.9);
   border: none;
   color: #fff;
   font-size: 16px;
+  width: 220px;
 }
 
 .add-player button {
@@ -51,7 +53,7 @@ h1 {
   transform: scale(1.05);
 }
 
-/* Player Cards Layout */
+/* --- Player Cards Layout --- */
 .player-cards {
   display: flex;
   flex-wrap: wrap;
@@ -65,7 +67,7 @@ h1 {
   background: rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   padding: 16px;
-  width: 45%;           /* ✅ 2 per row */
+  width: 45%;
   min-width: 160px;
   max-width: 240px;
   text-align: center;
@@ -82,6 +84,7 @@ h1 {
   background: rgba(255, 255, 255, 0.12);
 }
 
+/* Remove Player Button */
 .remove-player-btn {
   position: absolute;
   top: 8px;
@@ -93,6 +96,12 @@ h1 {
   padding: 4px 8px;
   font-size: 0.9rem;
   cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.remove-player-btn:hover {
+  transform: scale(1.1);
+  background: linear-gradient(145deg, #ff4c5b, #c13a3a);
 }
 
 /* Expanded Section Inside Card */
@@ -143,7 +152,60 @@ h1 {
   font-size: 16px;
 }
 
-/* Calculate Button */
+/* --- Buy-in Cards --- */
+.results-box {
+  flex: 1;
+  min-width: 300px;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.6);
+  margin-top: 20px;
+}
+
+.buyin-card {
+  position: relative;
+  background: rgba(162, 89, 255, 0.08);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: left;
+  margin: 8px auto;
+  width: 90%;
+  max-width: 320px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+  transition: transform 0.25s ease;
+}
+
+.buyin-card:hover {
+  transform: scale(1.03);
+}
+
+.buyin-card small {
+  color: #aaa;
+  display: block;
+  margin-top: 5px;
+}
+
+.remove-buyin {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: linear-gradient(145deg, #e63946, #a83232);
+  border: none;
+  padding: 4px 8px;
+  border-radius: 8px;
+  color: white;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: background 0.25s ease, transform 0.25s ease;
+}
+
+.remove-buyin:hover {
+  background: linear-gradient(145deg, #ff4c5b, #c13a3a);
+  transform: scale(1.1);
+}
+
+/* --- Calculate Button --- */
 .calculate-btn {
   background: linear-gradient(145deg, #b87333, #a259ff, #00ff99);
   color: white;
@@ -164,7 +226,7 @@ h1 {
   box-shadow: 0 0 28px rgba(162, 89, 255, 0.7);
 }
 
-/* Results Layout */
+/* --- Results Layout --- */
 .results-container {
   display: flex;
   flex-wrap: wrap;
@@ -173,34 +235,37 @@ h1 {
   justify-content: center;
 }
 
-.results-box {
-  flex: 1;
-  min-width: 320px;
-  background: rgba(255,255,255,0.06);
-  padding: 20px;
-  border-radius: 14px;
-  box-shadow: 0 6px 24px rgba(0,0,0,0.6);
-}
-
 .results-box h2 {
   color: #a259ff;
+  margin-top: 0;
+  text-shadow: 0 0 10px rgba(162, 89, 255, 0.4);
 }
 
-/* Cards inside results */
+/* --- Summary & Settlement Cards --- */
 .card-container {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
 
-.player-card.winner { border-left: 6px solid #00ff99; }
-.player-card.loser { border-left: 6px solid #e63946; }
-.player-card.neutral { border-left: 6px solid #b87333; }
+.player-card.winner {
+  border-left: 5px solid #00ff99;
+  background: rgba(0, 255, 150, 0.05);
+}
+.player-card.loser {
+  border-left: 5px solid #e63946;
+  background: rgba(230, 57, 70, 0.05);
+}
+.player-card.neutral {
+  border-left: 5px solid #b87333;
+  background: rgba(184, 115, 51, 0.05);
+}
 
 .settlement-card {
   background: rgba(255, 255, 255, 0.08);
   border-radius: 10px;
   padding: 12px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
 }
 
 .settlement-card .amount {
@@ -208,7 +273,7 @@ h1 {
   color: #00ff99;
 }
 
-/* Share Buttons */
+/* --- Share Buttons --- */
 .share-buttons {
   display: flex;
   justify-content: center;
@@ -225,6 +290,7 @@ h1 {
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 0 10px rgba(162, 89, 255, 0.5);
+  transition: transform 0.2s ease;
 }
 
 .copy-btn:hover {
@@ -240,26 +306,45 @@ h1 {
   font-weight: 600;
   cursor: pointer;
   box-shadow: 0 0 10px rgba(37, 211, 102, 0.5);
+  transition: transform 0.2s ease;
 }
 
 .whatsapp-btn:hover {
   transform: scale(1.05);
 }
 
-/* Responsive */
+/* --- Responsive Tweaks --- */
 @media (max-width: 768px) {
   .player-card {
-    width: 45%;  /* two per row */
+    width: 45%;
+  }
+
+  .buyin-card {
+    width: 95%;
+  }
+
+  .results-box {
+    min-width: 100%;
   }
 }
 
 @media (max-width: 480px) {
   .player-card {
-    width: 100%;  /* one per row on small phones */
+    width: 100%;
+  }
+
+  .buyin-card {
+    width: 100%;
+  }
+
+  .calculate-btn {
+    font-size: 1rem;
+    padding: 12px 20px;
   }
 }
 
-/* Fix zoom issue: ensure inputs ≥ 16px */
-input[type="text"], input[type="number"] {
+/* --- Fix Zoom on Input (iOS Safari) --- */
+input[type="text"],
+input[type="number"] {
   font-size: 16px;
 }
