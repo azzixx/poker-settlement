@@ -98,24 +98,39 @@ function App() {
     }
   };
 
-  const copyToClipboard = () => {
-    if (!results) return;
-    const text = `Poker Settlement\n\nSummary:\n${results.summary
+  const buildShareText = () => {
+    if (!results) return "";
+    const buyinText = players
+      .map((p) => `${p.name}: ${p.buyinTotal}₪ (${p.buyinCount} buys)`)
+      .join("\n");
+    const summaryText = results.summary
       .map((s) => `${s.name}: ${s.net >= 0 ? "+" : ""}${s.net}₪`)
-      .join("\n")}\n\nSettlements:\n${results.transfers
+      .join("\n");
+    const settlementText = results.transfers
       .map((t) => `${t.from} → ${t.to}: ${t.amount}₪`)
-      .join("\n")}`;
+      .join("\n");
+    return `♠️ Poker Settlement ♠️
+
+💰 Buy-ins:
+${buyinText}
+
+📊 Summary:
+${summaryText}
+
+💸 Settlements:
+${settlementText || "No transfers needed"}`;
+  };
+
+  const copyToClipboard = () => {
+    const text = buildShareText();
+    if (!text) return;
     navigator.clipboard.writeText(text);
     alert("📋 Results copied to clipboard!");
   };
 
   const shareWhatsApp = () => {
-    if (!results) return;
-    const text = `Poker Settlement\n\nSummary:\n${results.summary
-      .map((s) => `${s.name}: ${s.net >= 0 ? "+" : ""}${s.net}₪`)
-      .join("\n")}\n\nSettlements:\n${results.transfers
-      .map((t) => `${t.from} → ${t.to}: ${t.amount}₪`)
-      .join("\n")}`;
+    const text = buildShareText();
+    if (!text) return;
     const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
     window.open(url, "_blank");
   };
@@ -123,6 +138,7 @@ function App() {
   return (
     <div className="App">
       <h1>♠️ Poker Settlement</h1>
+
       <div className="add-player">
         <input
           value={name}
@@ -179,10 +195,31 @@ function App() {
         ))}
       </div>
 
+      {/* Buy-ins History */}
+      {buyinsHistory.length > 0 && (
+        <div className="results-box">
+          <h2>🪙 Buy-ins History</h2>
+          <div className="card-container">
+            {buyinsHistory.map((b) => (
+              <div key={b.id} className="buyin-card">
+                <p>
+                  <b>{b.name}</b> bought in {b.amount}₪
+                </p>
+                <small>{new Date(b.timestamp).toLocaleTimeString()}</small>
+                <button className="remove-buyin" onClick={() => removeBuyin(b.id)}>
+                  ❌
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <button className="calculate-btn" onClick={calculate}>
         💰 Calculate
       </button>
 
+      {/* Results */}
       {results && (
         <div className="results-container">
           <div className="results-box">
@@ -221,6 +258,7 @@ function App() {
               )}
             </div>
 
+            {/* Share Buttons */}
             <div className="share-buttons">
               <button className="copy-btn" onClick={copyToClipboard}>📋 Copy</button>
               <button className="whatsapp-btn" onClick={shareWhatsApp}>💬 WhatsApp</button>
